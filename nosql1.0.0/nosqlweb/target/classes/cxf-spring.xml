@@ -1,0 +1,40 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cassandra="http://www.springframework.org/schema/data/cassandra"
+	xmlns:cassandra-base="http://www.springframework.org/schema/cassandra"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:http-conf="http://cxf.apache.org/transports/http/configuration"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/data/cassandra http://www.springframework.org/schema/data/cassandra/spring-cassandra-1.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+				http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd
+		http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd 
+		http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd"
+	default-lazy-init="false">
+
+	<!-- Loads the properties into the Spring Context and uses them to fill 
+		in placeholders in the bean definitions -->
+	<context:property-placeholder location="classpath:cassandra.properties" />
+	<!-- user name password need to be pass here -->
+	<cassandra:cluster id="cassandraCluster"
+		contact-points="${cassandra.contactpoints}" port="${cassandra.port}" />
+	<!-- REQUIRED: The Default Cassandra Mapping Context used by CassandraConverter -->
+	<cassandra:mapping entity-base-packages="com.sample.nosql.pojo">
+	</cassandra:mapping>
+	<!-- REQUIRED: The Default Cassandra Converter used by CassandraTemplate -->
+	<cassandra:converter />
+	<!-- REQUIRED: The Cassandra Session, built from the Cluster, and attaching 
+		to a keyspace -->
+	<cassandra:session id="cassandra-session"
+		keyspace-name="${cassandra.keyspace}" />
+	<bean id="cassandraTemplate"
+		class="org.springframework.data.cassandra.core.CassandraTemplate">
+		<constructor-arg ref="cassandra-session" />
+	</bean>
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+	<context:component-scan base-package="com.sample.nosql" />
+	<bean id="gson" class="com.google.gson.Gson" />
+</beans>
